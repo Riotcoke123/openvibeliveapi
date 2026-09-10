@@ -20,6 +20,7 @@
   - [GET /api/streams](#get-apistreams)
   - [GET /api/streams/recently-online](#get-apistreamsrecently-online)
   - [GET /api/streams/recent-vods](#get-apistreamsrecent-vods)
+  - [GET /api/pastes](#get-apipastes)
   - [GET /api/auth/refresh](#get-apiauthrefresh)
   - [GET /api/easter-egg/daily](#get-apieaster-eggdaily)
   - [GET /api/chat/gif/providers](#get-apichatgifproviders)
@@ -327,6 +328,106 @@ Host: openvibe.live
 | `limit` | integer | Page size used for this response |
 | `offset` | integer | Offset used for this response |
 | `hasMore` | boolean | Whether additional pages are available beyond this one |
+
+### `GET /api/pastes`
+
+Returns a paginated list of "pastes" — user-generated screenshots (and other paste types) captured from streams, each with AI-generated tags and a summary.
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `limit` | integer | No | Number of pastes to return per page. |
+| `offset` | integer | No | Number of pastes to skip, for pagination. |
+
+**Example Request**
+
+```http
+GET /api/pastes?limit=10&offset=0 HTTP/1.1
+Host: openvibe.live
+```
+
+**Example Response — `200 OK`**
+
+```json
+{
+  "pastes": [
+    {
+      "unique_views": 2,
+      "id": 901,
+      "app_id": "live",
+      "slug": "hot-jay-77",
+      "user_id": 1,
+      "type": "screenshot",
+      "title": "Stream Sparks with Chat Buzz",
+      "content": null,
+      "language": "text",
+      "visibility": "public",
+      "stream_id": 2342,
+      "screenshot_url": "/p/hot-jay-77/screenshot",
+      "metadata": "{\"page_url\":null,\"user_agent\":\"node\",\"original_name\":\"live-2342-132.jpg\",\"size_bytes\":35611,\"mime_type\":\"image/jpeg\"}",
+      "burn_after_read": false,
+      "forked_from": null,
+      "pinned": false,
+      "views": 2,
+      "copies": 0,
+      "likes": 0,
+      "is_nsfw": false,
+      "ai_summary": "A streaming dashboard interface showing a chat buzz stream with colored tag-like buttons and a dark layout, plus a webcam feed of a person in the bottom-left corner.",
+      "ai_tags": "[\"stream\",\"dashboard\",\"chat\",\"tags\",\"webcam\",\"live\"]",
+      "ai_analyzed_at": "2026-09-10 21:46:40",
+      "url": "/p/hot-jay-77",
+      "raw_url": "/p/hot-jay-77/raw",
+      "created_at": "2026-09-10 21:46:15",
+      "updated_at": "2026-09-10 21:46:15",
+      "username": "goosely",
+      "display_name": "Goosely",
+      "profile_color": "#c0965c",
+      "avatar_url": "https://openvibe.media/f/screenshots/avatar-1-1786275980625-04833b19.png"
+    }
+  ],
+  "total": 683,
+  "limit": 10,
+  "offset": 0
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `pastes` | array | Page of paste objects, most recent first |
+| `pastes[].id` | integer | Paste ID |
+| `pastes[].slug` | string | URL slug for the paste (used in `url`/`raw_url`) |
+| `pastes[].app_id` | string | Application/stream namespace (e.g. `live`) |
+| `pastes[].user_id` | integer | Author's internal user ID |
+| `pastes[].username` / `display_name` | string | Author identity |
+| `pastes[].profile_color` | string | Hex color associated with the author's profile |
+| `pastes[].avatar_url` | string \| null | Author's avatar image URL |
+| `pastes[].type` | string | Paste type (e.g. `screenshot`) |
+| `pastes[].title` | string | Paste title |
+| `pastes[].content` | string \| null | Text content, for text-type pastes |
+| `pastes[].language` | string | Syntax/content language (e.g. `text`) |
+| `pastes[].visibility` | string | Visibility setting (e.g. `public`) |
+| `pastes[].stream_id` | integer \| null | Originating live stream session, if captured from one |
+| `pastes[].screenshot_url` | string | Relative URL to the screenshot image |
+| `pastes[].metadata` | string (JSON) | Stringified JSON blob with capture metadata (`page_url`, `user_agent`, `original_name`, `size_bytes`, `mime_type`) |
+| `pastes[].burn_after_read` | boolean | Whether the paste is deleted after first view |
+| `pastes[].forked_from` | integer \| null | ID of the paste this was forked from, if any |
+| `pastes[].pinned` | boolean | Whether the paste is pinned |
+| `pastes[].views` / `unique_views` | integer | Total and unique view counts |
+| `pastes[].copies` | integer | Number of times the paste content was copied |
+| `pastes[].likes` | integer | Like count |
+| `pastes[].is_nsfw` | boolean | Whether the paste is flagged NSFW |
+| `pastes[].ai_summary` | string \| null | AI-generated description of the paste content |
+| `pastes[].ai_tags` | string (JSON array) | Stringified JSON array of AI-generated tags |
+| `pastes[].ai_analyzed_at` | string \| null | Timestamp the AI analysis was run |
+| `pastes[].url` | string | Relative URL to view the paste |
+| `pastes[].raw_url` | string | Relative URL to the raw asset |
+| `pastes[].created_at` / `updated_at` | string | Timestamps for creation and last update |
+| `total` | integer | Total number of pastes available across all pages |
+| `limit` | integer | Page size used for this response |
+| `offset` | integer | Offset used for this response |
 
 ### `GET /api/auth/refresh`
 
