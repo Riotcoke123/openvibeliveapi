@@ -18,6 +18,8 @@
 - [Endpoints](#endpoints)
   - [GET /api/updates](#get-apiupdates)
   - [GET /api/streams](#get-apistreams)
+  - [GET /api/streams/recently-online](#get-apistreamsrecently-online)
+  - [GET /api/streams/recent-vods](#get-apistreamsrecent-vods)
   - [GET /api/auth/refresh](#get-apiauthrefresh)
   - [GET /api/easter-egg/daily](#get-apieaster-eggdaily)
   - [GET /api/chat/gif/providers](#get-apichatgifproviders)
@@ -136,6 +138,195 @@ Host: openvibe.live
 | `streams` | array | List of currently tracked stream objects. Empty when no one is live. |
 
 > The shape of individual stream objects (platform, title, viewer count, thumbnail, live status, etc.) is populated when one or more streams are active; an empty array is returned when nothing is currently live.
+
+### `GET /api/streams/recently-online`
+
+Returns a paginated list of streamers, ordered by recency, along with their managed streams, an AI-generated content overview, and their top active funding goal (if any).
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `limit` | integer | No | Number of streamers to return per page. |
+| `offset` | integer | No | Number of streamers to skip, for pagination. |
+
+**Example Request**
+
+```http
+GET /api/streams/recently-online?limit=12&offset=0 HTTP/1.1
+Host: openvibe.live
+```
+
+**Example Response — `200 OK`**
+
+```json
+{
+  "streamers": [
+    {
+      "user_id": 1,
+      "username": "goosely",
+      "display_name": "Goosely",
+      "avatar_url": "https://openvibe.media/f/screenshots/avatar-1-1786275980625-04833b19.png",
+      "profile_color": "#c0965c",
+      "last_online_at": "2026-09-10 22:03:09",
+      "ai_overview": "Goosely is an IRL streamer who blends live in-person interactions with tech- and retro-computer aesthetics...",
+      "ai_overview_short": "Goosely is an IRL streamer who blends live in-person interactions with tech- and retro-computer aesthetics...",
+      "managed_streams": [
+        {
+          "managed_stream_id": 1,
+          "slug": "whip",
+          "title": "OpenVibe.Live + PowerChat.Live",
+          "protocol": "webrtc",
+          "last_live_at": "2026-09-10 22:03:09",
+          "vod_thumbnail": "https://openvibe.media/t/vod-2580-1787936300946.jpg"
+        }
+      ],
+      "top_goal": {
+        "title": "Raspi Robot",
+        "current": 100,
+        "target": 8000
+      }
+    }
+  ],
+  "total": 71,
+  "limit": 12,
+  "offset": 0,
+  "hasMore": true
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `streamers` | array | Page of streamer objects, most recently online first |
+| `streamers[].user_id` | integer | Streamer's internal user ID |
+| `streamers[].username` | string | Streamer's username |
+| `streamers[].display_name` | string | Streamer's display name |
+| `streamers[].avatar_url` | string \| null | Avatar image URL |
+| `streamers[].profile_color` | string | Hex color associated with the streamer's profile |
+| `streamers[].last_online_at` | string | Timestamp the streamer was last online |
+| `streamers[].ai_overview` | string \| null | Full AI-generated summary of the streamer's content |
+| `streamers[].ai_overview_short` | string \| null | Truncated version of `ai_overview` |
+| `streamers[].managed_streams` | array | Streams/channels managed under this streamer |
+| `streamers[].managed_streams[].managed_stream_id` | integer | Managed stream ID |
+| `streamers[].managed_streams[].slug` | string \| null | URL slug for the stream, if set |
+| `streamers[].managed_streams[].title` | string | Stream title |
+| `streamers[].managed_streams[].protocol` | string | Streaming protocol (`webrtc`, `rtmp`) |
+| `streamers[].managed_streams[].last_live_at` | string | Timestamp this managed stream was last live |
+| `streamers[].managed_streams[].vod_thumbnail` | string \| null | Thumbnail URL for the latest VOD, if available |
+| `streamers[].top_goal` | object (optional) | The streamer's top active funding goal, if any |
+| `streamers[].top_goal.title` | string | Goal title |
+| `streamers[].top_goal.current` | number | Amount currently raised |
+| `streamers[].top_goal.target` | number | Goal target amount |
+| `total` | integer | Total number of streamers available across all pages |
+| `limit` | integer | Page size used for this response |
+| `offset` | integer | Offset used for this response |
+| `hasMore` | boolean | Whether additional pages are available beyond this one |
+
+### `GET /api/streams/recent-vods`
+
+Returns a paginated list of the most recently created VODs (recorded broadcasts) across the network.
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `limit` | integer | No | Number of VODs to return per page. |
+| `offset` | integer | No | Number of VODs to skip, for pagination. |
+
+**Example Request**
+
+```http
+GET /api/streams/recent-vods?limit=12&offset=0 HTTP/1.1
+Host: openvibe.live
+```
+
+**Example Response — `200 OK`**
+
+```json
+{
+  "vods": [
+    {
+      "unique_views": 2,
+      "id": 3384,
+      "app_id": "live",
+      "stream_id": 2341,
+      "managed_stream_id": 104,
+      "user_id": 327,
+      "title": "JapaneseOldGuy's Stream",
+      "description": "",
+      "status": "ready",
+      "duration": 13427,
+      "duration_seconds": 13427,
+      "file_size": 10366166967,
+      "file_path": "vod-live-3384-1789050233492.mp4",
+      "playback_url": "https://openvibe.media/v/3384",
+      "thumbnail_url": "https://openvibe.media/t/vod-3384-1789063683687.jpg",
+      "storage_provider": "local",
+      "visibility": "public",
+      "is_public": true,
+      "health_status": "ok",
+      "clips_only": false,
+      "is_recording": false,
+      "ai_overview": null,
+      "ai_analyzed_at": null,
+      "view_count": 2,
+      "created_at": "2026-09-10 14:23:53",
+      "meta": {
+        "protocol": "rtmp",
+        "mode": "vod",
+        "clips_only": false,
+        "part": 1
+      },
+      "username": "JapaneseOldGuy",
+      "display_name": "JapaneseOldGuy",
+      "avatar_url": "https://openvibe.media/p/safe-frost-74/raw"
+    }
+  ],
+  "total": 595,
+  "limit": 12,
+  "offset": 0,
+  "hasMore": true
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `vods` | array | Page of VOD objects, most recently created first |
+| `vods[].id` | integer | VOD ID |
+| `vods[].unique_views` | integer | Count of unique viewers |
+| `vods[].view_count` | integer | Total view count |
+| `vods[].app_id` | string | Application/stream namespace (e.g. `live`) |
+| `vods[].stream_id` | integer | ID of the originating live stream session |
+| `vods[].managed_stream_id` | integer | ID of the managed stream this VOD belongs to |
+| `vods[].user_id` | integer | Streamer's internal user ID |
+| `vods[].username` / `display_name` | string | Streamer identity |
+| `vods[].avatar_url` | string \| null | Streamer's avatar image URL |
+| `vods[].title` | string | VOD title |
+| `vods[].description` | string | VOD description (may be empty) |
+| `vods[].status` | string | Processing status (e.g. `ready`) |
+| `vods[].duration` / `duration_seconds` | integer | VOD length in seconds |
+| `vods[].file_size` | integer | File size in bytes |
+| `vods[].file_path` | string | Storage path/filename of the VOD file |
+| `vods[].playback_url` | string | Public playback URL |
+| `vods[].thumbnail_url` | string | Thumbnail image URL |
+| `vods[].storage_provider` | string | Backing storage provider (e.g. `local`, `b2`) |
+| `vods[].visibility` | string | Visibility setting (e.g. `public`) |
+| `vods[].is_public` | boolean | Whether the VOD is publicly viewable |
+| `vods[].health_status` | string | File/processing health check result |
+| `vods[].clips_only` | boolean | Whether the VOD only contains clips |
+| `vods[].is_recording` | boolean | Whether the VOD is still actively recording |
+| `vods[].ai_overview` | string \| null | AI-generated summary of the VOD content, if analyzed |
+| `vods[].ai_analyzed_at` | string \| null | Timestamp the AI analysis was run |
+| `vods[].created_at` | string | Timestamp the VOD was created |
+| `vods[].meta` | object | Additional metadata (protocol, mode, part number, etc.) |
+| `total` | integer | Total number of VODs available across all pages |
+| `limit` | integer | Page size used for this response |
+| `offset` | integer | Offset used for this response |
+| `hasMore` | boolean | Whether additional pages are available beyond this one |
 
 ### `GET /api/auth/refresh`
 
@@ -450,6 +641,6 @@ Licensed under [GPL-3.0](https://github.com/Riotcoke123/openvibeliveapi/tree/mai
 
 <div align="center">
 
-Made for [openvibe.live](https://openvibe.live/)
+Made for [openvibe.live](https://openvibe.live/) 🐐
 
 </div>
