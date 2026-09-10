@@ -1,4 +1,5 @@
 <div align="center">
+
 <img width="553" height="241" alt="Untitled" src="https://github.com/user-attachments/assets/50f3dca2-04cd-409f-bfb2-e431f957ab13" />
 
 **Public documentation for the OpenVibe network API**
@@ -22,10 +23,12 @@
   - [GET /api/streams/recently-online](#get-apistreamsrecently-online)
   - [GET /api/streams/recent-vods](#get-apistreamsrecent-vods)
   - [GET /api/pastes](#get-apipastes)
+  - [GET /api/clips](#get-apiclips)
   - [GET /api/auth/refresh](#get-apiauthrefresh)
   - [GET /api/easter-egg/daily](#get-apieaster-eggdaily)
   - [GET /api/chat/gif/providers](#get-apichatgifproviders)
   - [GET /api/home/pulse](#get-apihomepulse)
+  - [GET /api/home/hero](#get-apihomehero)
   - [GET /api/live-events](#get-apilive-events)
   - [OpenVibe.Games — GET /api/game/canvas/state](#openvibegames--get-apigamecanvasstate)
   - [OpenVibe.Games — GET /api/game/leaderboard/mining](#openvibegames--get-apigameleaderboardmining)
@@ -430,6 +433,115 @@ Host: openvibe.live
 | `limit` | integer | Page size used for this response |
 | `offset` | integer | Offset used for this response |
 
+### `GET /api/clips`
+
+Returns a paginated list of clips (short highlight cuts from VODs), each with playback info and, when processed, an AI-generated overview.
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `limit` | integer | No | Number of clips to return per page. |
+| `offset` | integer | No | Number of clips to skip, for pagination. |
+
+**Example Request**
+
+```http
+GET /api/clips?limit=12&offset=0 HTTP/1.1
+Host: openvibe.live
+```
+
+**Example Response — `200 OK`**
+
+```json
+{
+  "clips": [
+    {
+      "unique_views": 3,
+      "id": 349,
+      "app_id": "live",
+      "vod_id": 3122,
+      "stream_id": 2335,
+      "channel_user_id": 80,
+      "user_id": 80,
+      "title": "A Computer Screen Shows A Discord/Stream Chat Window",
+      "description": "",
+      "status": "ready",
+      "start_time": 4718,
+      "end_time": 4732.427,
+      "duration": 14.427,
+      "duration_seconds": 14.427,
+      "file_path": "clip-1788950355082-wmz87p.webm",
+      "playback_url": "https://openvibe.media/c/349",
+      "thumbnail_url": "https://openvibe.media/t/clip-349-1788950504280.jpg",
+      "visibility": "public",
+      "is_public": true,
+      "storage_provider": "local",
+      "auto_generated": false,
+      "ai_overview": "The video presents a chaotic, multi-monitor livestream layout that looks like a futuristic cockpit...",
+      "ai_analyzed_at": null,
+      "view_count": 3,
+      "created_at": "2026-09-09 10:39:15",
+      "username": "Maticus",
+      "display_name": "Maticus",
+      "avatar_url": "https://openvibe.media/f/screenshots/avatar-80-1786485794298-0a925ac2.jpg",
+      "profile_color": "#17722e",
+      "source_streamer_id": 80,
+      "source_streamer_username": "Maticus",
+      "source_streamer_display_name": "Maticus",
+      "streamer_username": "Maticus",
+      "streamer_display_name": "Maticus",
+      "streamer_avatar_url": "https://openvibe.media/f/screenshots/avatar-80-1786485794298-0a925ac2.jpg",
+      "ai_overview_short": "The video presents a chaotic, multi-monitor livestream layout that looks like a futuristic cockpit, with several windows, chat, and memes arranged around the screen."
+    }
+  ],
+  "total": 294,
+  "limit": 12,
+  "offset": 0,
+  "hasMore": true,
+  "streamers": [],
+  "activeFilter": null
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `clips` | array | Page of clip objects, most recent first |
+| `clips[].id` | integer | Clip ID |
+| `clips[].vod_id` | integer | ID of the source VOD the clip was cut from |
+| `clips[].stream_id` | integer | ID of the originating live stream session |
+| `clips[].app_id` | string | Application/stream namespace (e.g. `live`) |
+| `clips[].channel_user_id` / `user_id` | integer | Owning channel / clip creator's user ID |
+| `clips[].username` / `display_name` | string | Clip creator identity |
+| `clips[].profile_color` | string | Hex color associated with the creator's profile |
+| `clips[].avatar_url` | string | Creator's avatar image URL |
+| `clips[].source_streamer_id` / `_username` / `_display_name` | mixed | Identity of the streamer the clip was sourced from |
+| `clips[].streamer_username` / `streamer_display_name` / `streamer_avatar_url` | string | Display identity shown for the clip's streamer |
+| `clips[].title` | string | Clip title |
+| `clips[].description` | string | Clip description (may be empty) |
+| `clips[].status` | string | Processing status (`ready` or `failed`) |
+| `clips[].start_time` / `end_time` | number | Offsets (seconds) into the source VOD marking the clip bounds |
+| `clips[].duration` / `duration_seconds` | number | Clip length in seconds |
+| `clips[].file_path` | string \| null | Storage filename; `null` if processing failed |
+| `clips[].playback_url` | string | Public playback URL |
+| `clips[].thumbnail_url` | string \| null | Thumbnail image URL; `null` if processing failed |
+| `clips[].visibility` | string | Visibility setting (e.g. `public`) |
+| `clips[].is_public` | boolean | Whether the clip is publicly viewable |
+| `clips[].storage_provider` | string | Backing storage provider (e.g. `local`) |
+| `clips[].auto_generated` | boolean | Whether the clip was auto-generated rather than manually cut |
+| `clips[].ai_overview` / `ai_overview_short` | string \| null | Full and truncated AI-generated summaries of the clip content |
+| `clips[].ai_analyzed_at` | string \| null | Timestamp the AI analysis was run |
+| `clips[].view_count` / `unique_views` | integer | Total and unique view counts |
+| `clips[].created_at` | string | Timestamp the clip was created |
+| `total` | integer | Total number of clips available across all pages |
+| `limit` | integer | Page size used for this response |
+| `offset` | integer | Offset used for this response |
+| `hasMore` | boolean | Whether additional pages are available beyond this one |
+| `streamers` | array | Streamer filter options (empty when unfiltered) |
+| `activeFilter` | string \| null | Currently applied streamer filter, if any |
+
 ### `GET /api/auth/refresh`
 
 Refreshes an authenticated session/token. **Requires an active session** — this is not a public/anonymous endpoint.
@@ -643,6 +755,131 @@ Host: openvibe.live
 | `topEarners[].total` | number | Total amount earned |
 | `moments` | array | Notable site moments (may be empty) |
 | `latestUpdate` | object | Most recent changelog entry (see [`/api/updates`](#get-apiupdates)) |
+
+### `GET /api/home/hero`
+
+Returns the data behind the homepage hero section: network-wide stats (with daily/weekly/monthly deltas), a viewer trend timeseries, a rotating media showcase (clips/VODs/pastes), notable moments, and rotating AI-generated slogans.
+
+**Example Request**
+
+```http
+GET /api/home/hero HTTP/1.1
+Host: openvibe.live
+```
+
+**Example Response — `200 OK`**
+
+```json
+{
+  "stats": {
+    "viewersNow": 0,
+    "hoursWatched": 4159,
+    "vibesTipped": 0,
+    "activeSubs": 0,
+    "pointsEarned": 789800,
+    "pointsSpent": 575,
+    "redemptions": 0,
+    "supporters": 0,
+    "vibesBought": 500,
+    "goalsActive": 3,
+    "goalsReached": 0,
+    "vods": 595,
+    "clips": 294,
+    "liveSessions": 2342,
+    "streamers": 71,
+    "chatMessages": 68706,
+    "users": 332,
+    "anons": 27628,
+    "follows": 62,
+    "emotes": 40,
+    "pastes": 693,
+    "aiMemories": 13070,
+    "pasteImages": 627,
+    "pasteText": 66,
+    "streamHours": 341,
+    "weeklyActive": 35,
+    "weeklyVisitors": 89,
+    "liveNow": 0,
+    "recent": {
+      "users": { "d": 0, "w": 5, "m": 30 },
+      "messages": { "d": 264, "w": 2394, "m": 12070 },
+      "follows": { "d": 1, "w": 1, "m": 3 }
+    },
+    "viewerTrend": [
+      { "t": "1788996218", "viewers": 0, "live_streams": 0 },
+      { "t": "1789001618", "viewers": 2, "live_streams": 1 }
+    ]
+  },
+  "media": [
+    {
+      "kind": "clip",
+      "title": "A Man Wearing A Hat Stands At The",
+      "thumbnail": "https://openvibe.media/t/clip-339-1788698827505.jpg",
+      "href": "/clip/339"
+    },
+    {
+      "kind": "vod",
+      "title": "JapaneseOldGuy's Stream",
+      "thumbnail": "https://openvibe.media/t/vod-3032-1788961342285.jpg",
+      "href": "/vod/3032"
+    },
+    {
+      "kind": "paste",
+      "title": "When Repo Teases a Tiny Stream",
+      "thumbnail": "https://openvibe.media/p/dusk-horse-18/screenshot",
+      "text": null,
+      "href": "/p/dusk-horse-18"
+    }
+  ],
+  "moments": [],
+  "slogans": {
+    "audiences": ["finditfixit rant observers", "test-obs standby crew", "castroedwin IRL watchers"],
+    "quips": ["we ship what we test, proudly", "AI takes notes, humans take the memes"],
+    "ai": true,
+    "updated_at": 1789070974804,
+    "next_at": 1789092574804
+  }
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `stats` | object | Network-wide aggregate statistics |
+| `stats.viewersNow` / `liveNow` | integer | Current live viewer count / current number of live streams |
+| `stats.hoursWatched` / `streamHours` | integer | Total hours watched / total hours streamed |
+| `stats.vibesTipped` / `vibesBought` | integer | Total tip currency ("vibes") tipped / purchased |
+| `stats.activeSubs` / `supporters` | integer | Active subscriber and supporter counts |
+| `stats.pointsEarned` / `pointsSpent` | integer | Total loyalty points earned / spent site-wide |
+| `stats.redemptions` | integer | Total point redemptions |
+| `stats.goalsActive` / `goalsReached` | integer | Count of currently active / completed funding goals |
+| `stats.vods` / `clips` / `pastes` | integer | Total counts of VODs, clips, and pastes |
+| `stats.liveSessions` | integer | Total historical live session count |
+| `stats.streamers` / `users` / `anons` | integer | Streamer, registered user, and anonymous visitor counts |
+| `stats.chatMessages` | integer | Total chat messages sent site-wide |
+| `stats.follows` / `emotes` | integer | Total follows and custom emotes |
+| `stats.aiMemories` | integer | Total AI-generated "memories"/moments recorded |
+| `stats.pasteImages` / `pasteText` | integer | Breakdown of pastes by type |
+| `stats.weeklyActive` / `weeklyVisitors` | integer | Weekly active user and visitor counts |
+| `stats.recent` | object | Per-metric deltas keyed by metric name, each with `d` (day), `w` (week), `m` (month) counts |
+| `stats.viewerTrend` | array | Timeseries of viewer/live-stream counts, one point per interval |
+| `stats.viewerTrend[].t` | string (Unix seconds) | Timestamp of the data point |
+| `stats.viewerTrend[].viewers` | integer | Concurrent viewers at that point |
+| `stats.viewerTrend[].live_streams` | integer | Concurrent live streams at that point |
+| `media` | array | Rotating showcase of recent clips, VODs, and pastes |
+| `media[].kind` | string | Media type: `clip`, `vod`, or `paste` |
+| `media[].title` | string | Media title |
+| `media[].thumbnail` | string | Thumbnail image URL |
+| `media[].text` | string \| null | Text content, for text-type pastes |
+| `media[].href` | string | Relative link to the media item |
+| `moments` | array | Notable AI-flagged moments (may be empty) |
+| `slogans` | object | Rotating homepage tagline data |
+| `slogans.audiences` | array of strings | Pool of audience-callout phrases |
+| `slogans.quips` | array of strings | Pool of slogan/quip phrases |
+| `slogans.ai` | boolean | Whether slogans are AI-generated |
+| `slogans.updated_at` | integer (Unix ms) | When the current slogan set was generated |
+| `slogans.next_at` | integer (Unix ms) | When the next slogan rotation will occur |
 
 ### `GET /api/live-events`
 
