@@ -1,4 +1,5 @@
 <div align="center">
+<img width="553" height="241" alt="Untitled" src="https://github.com/user-attachments/assets/50f3dca2-04cd-409f-bfb2-e431f957ab13" />
 
 **Public documentation for the OpenVibe network API**
 
